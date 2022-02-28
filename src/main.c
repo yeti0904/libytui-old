@@ -3,23 +3,24 @@
 #include "functions.h"
 #include "keys.h"
 
-YTUI_TermHandle YTUI_Init() {
-	YTUI_TermHandle ret;
-	ret.screen.buffer = NULL;
-	ret.size = YTUI_GetTermSize();
-	ret.screen.width = ret.size.x;
-	ret.screen.height = ret.size.y;
-	ret.screen.buffer = (YTUI_Character**) YTUI_Alloc(ret.screen.buffer, ret.screen.height * sizeof(YTUI_Character*));
-	for (size_t i = 0; i<ret.screen.height; i++) {
-		ret.screen.buffer[i] = NULL;
-		ret.screen.buffer[i] = (YTUI_Character*) YTUI_Alloc(ret.screen.buffer[i], ret.screen.width * sizeof(YTUI_Character)); // line 13
-		for (size_t j = 0; j<ret.screen.width; j++) {
-			ret.screen.buffer[i][j].ch        = ' ';
-			ret.screen.buffer[i][j].attribute = YTUI_DefaultAttribute();
+YTUI_TermHandle* YTUI_Init() {
+	YTUI_TermHandle* ret = NULL;
+	ret = (YTUI_TermHandle*) YTUI_Alloc(ret, sizeof(YTUI_TermHandle));
+	ret->screen.buffer = NULL;
+	ret->size          = YTUI_GetTermSize();
+	ret->screen.width  = ret->size.x;
+	ret->screen.height = ret->size.y;
+	ret->screen.buffer = (YTUI_Character**) YTUI_Alloc(ret->screen.buffer, ret->screen.height * sizeof(YTUI_Character*));
+	for (size_t i = 0; i<ret->screen.height; i++) {
+		ret->screen.buffer[i] = NULL;
+		ret->screen.buffer[i] = (YTUI_Character*) YTUI_Alloc(ret->screen.buffer[i], ret->screen.width * sizeof(YTUI_Character)); // line 13
+		for (size_t j = 0; j<ret->screen.width; j++) {
+			ret->screen.buffer[i][j].ch        = ' ';
+			ret->screen.buffer[i][j].attribute = YTUI_DefaultAttribute();
 		}
 	}
-	ret.cursor.x = 0;
-	ret.cursor.y = 0;
+	ret->cursor.x = 0;
+	ret->cursor.y = 0;
 
 	return ret;
 }
@@ -29,6 +30,7 @@ void YTUI_Exit(YTUI_TermHandle* term) {
 		free(term->screen.buffer[i]);
 	}
 	free(term->screen.buffer);
+	free(term);
 	puts("\033[2J"); // clear screen
 	puts("\033[H"); // move cursor to 0 0
 	YTUI_SetShowCursor(true);
