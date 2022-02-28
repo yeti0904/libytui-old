@@ -141,7 +141,7 @@ char YTUI_GetCharacter() {
 	return in;
 }
 
-uint16_t YTUI_GetKey() {
+YTUI_Key YTUI_GetKey() {
 	char in = YTUI_GetCharacter();
 	if (in != '\033') return in;
 

@@ -1,4 +1,5 @@
 #pragma once
+#include "_components.h"
 #include "structures.h"
 
 YTUI_TermHandle* YTUI_Init(); // creates a new terminal handle with an empty screen buffer
@@ -13,5 +14,5 @@ void             YTUI_MoveCursor(YTUI_TermHandle* term, uint16_t x, uint16_t y);
 void             YTUI_SetShowCursor(bool show); // sets whether the cursor is shown or not
 void             YTUI_Clear(YTUI_TermHandle* term); // clears the screen buffer
 char             YTUI_GetCharacter(); // returns an ASCII character from stdin
-uint16_t         YTUI_GetKey(); // returns either an ASCII character or a key code (defined in keys.h) from stdin
+YTUI_Key         YTUI_GetKey(); // returns either an ASCII character or a key code (defined in keys.h) from stdin
 void             YTUI_Render(YTUI_TermHandle* term); // renders the screen buffer to the terminal

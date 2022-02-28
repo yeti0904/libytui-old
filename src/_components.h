@@ -10,4 +10,4 @@
 #include <termios.h>
 #include <sys/ioctl.h>
 
-typedef uint16_t YTUI_Key_t;
+typedef uint16_t YTUI_Key;
