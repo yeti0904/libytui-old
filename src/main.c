@@ -124,6 +124,7 @@ void YTUI_Clear(YTUI_TermHandle* term) {
 	for (size_t i = 0; i<term->screen.height; i++) {
 		for (size_t j = 0; j<term->screen.width; j++) {
 			term->screen.buffer[i][j].ch = ' ';
+			term->screen.buffer[i][j].attribute = YTUI_DefaultAttribute();
 		}
 	}
 }
