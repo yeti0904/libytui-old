@@ -2,10 +2,11 @@
 #include "structures.h"
 #include "functions.h"
 #include "keys.h"
+#include "util.h"
 
 YTUI_TermHandle* YTUI_Init() {
 	YTUI_TermHandle* ret = NULL;
-	ret = (YTUI_TermHandle*) YTUI_Alloc(ret, sizeof(YTUI_TermHandle));
+	ret = (YTUI_TermHandle*) YTUI_Alloc(ret, sizeof(YTUI_TermHandle)); // this is line 8
 	ret->screen.buffer = NULL;
 	ret->size          = YTUI_GetTermSize();
 	ret->screen.width  = ret->size.x;
@@ -32,7 +33,9 @@ void YTUI_Exit(YTUI_TermHandle* term) {
 	free(term->screen.buffer);
 	free(term);
 	puts("\033[2J"); // clear screen
-	puts("\033[H"); // move cursor to 0 0
+	puts("\033[1;1H");  // move cursor to 0 0
+	puts("\033[0m"); // reset all attributes
+	YTUI_SetShowCursor(true);
 	YTUI_SetShowCursor(true);
 }
 
@@ -54,13 +57,14 @@ YTUI_Vec2 YTUI_GetTermSize() {
 
 YTUI_Attribute YTUI_DefaultAttribute() {
 	return (YTUI_Attribute) {
-		.colour     = false,
-		.trueColour = false,
-		.bold       = false,
-		.italic     = false,
-		.underline  = false,
-		.blink      = false,
-		.reverse    = false
+		.colourEnabled     = false,
+		.trueColourEnabled = false,
+		.bold              = false,
+		.italic            = false,
+		.underline         = false,
+		.blink             = false,
+		.reverse           = false,
+		.reset             = false
 	};
 }
 
@@ -104,7 +108,8 @@ void YTUI_PrintString(YTUI_TermHandle* term, char* str) {
 
 void YTUI_SetAttribute(YTUI_TermHandle* term, YTUI_Attribute attr) {
 	term->screen.buffer[term->cursor.y][term->cursor.x].attribute = attr;
-	term->attribute = attr;
+	term->attribute                                               = attr;
+	term->attribute.reset                                         = false;
 }
 
 void YTUI_MoveCursor(YTUI_TermHandle* term, uint16_t x, uint16_t y) {
@@ -183,12 +188,12 @@ YTUI_Key YTUI_GetKey() {
 void YTUI_Render(YTUI_TermHandle* term) {
 	YTUI_Attribute currentAttr = YTUI_DefaultAttribute();
 	YTUI_Attribute cellAttr;
-
-	printf("\033[2J"); // clear screen
+	
 	printf("\033[H"); // move cursor to 0 0
 	for (size_t i = 0; i<term->screen.height; i++) {
 		for (size_t j = 0; j<term->screen.width; j++) {
 			cellAttr = term->screen.buffer[i][j].attribute;
+			printf("\033[%d;%dH", (uint16_t)i, (uint16_t)j);
 			if (currentAttr.bold != cellAttr.bold) {
 				if (cellAttr.bold)
 					printf("\033[1m");
@@ -224,10 +229,37 @@ void YTUI_Render(YTUI_TermHandle* term) {
 					printf("\033[27m");
 				currentAttr.reverse = cellAttr.reverse;
 			}
+			if (!currentAttr.colourEnabled && cellAttr.colourEnabled) {
+				if (cellAttr.trueColourEnabled) {
+					printf("\033[38;2;%d;%d;%dm", cellAttr.trueColour.fore.r, cellAttr.trueColour.fore.g, cellAttr.trueColour.fore.b);
+					printf("\033[48;2;%d;%d;%dm", cellAttr.trueColour.back.r, cellAttr.trueColour.back.g, cellAttr.trueColour.back.b);
+				}
+				else {
+					printf("\033[%dm", YTUI_Util_ColourCodeToANSI(cellAttr.colour.fore, true));
+					printf("\033[%dm", YTUI_Util_ColourCodeToANSI(cellAttr.colour.back, false));
+				}
+			}
+
 			putchar(term->screen.buffer[i][j].ch);
 		}
-		if ((int)i != term->screen.height - 1)
-			putchar('\n');
 	}
 	printf("\033[%d;%dH", term->cursor.y + 1, term->cursor.x + 1);
+}
+
+YTUI_Attribute YTUI_AttributeAddColour(YTUI_Attribute attr, YTUI_ColourPair colour) {
+	attr.colourEnabled = true;
+	attr.colour        = colour;
+	return attr;
+}
+
+YTUI_Attribute YTUI_AttributeAddTrueColour(YTUI_Attribute attr, YTUI_TrueColourPair colour) {
+	attr.colourEnabled     = true;
+	attr.trueColourEnabled = true;
+	attr.trueColour        = colour;
+	return attr;
+}
+
+YTUI_Attribute YTUI_AttributeRemoveColour(YTUI_Attribute attr) {
+	attr.colourEnabled = false;
+	return attr;
 }

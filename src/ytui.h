@@ -7,6 +7,7 @@ extern "C" {
 #include "structures.h"
 #include "functions.h"
 #include "keys.h"
+#include "colours.h"
 
 #ifdef __cplusplus
 }

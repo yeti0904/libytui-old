@@ -6,8 +6,7 @@ typedef struct YTUI_Vec2 {
 } YTUI_Vec2;
 
 typedef struct YTUI_Rect {
-	YTUI_Vec2 x;
-	YTUI_Vec2 y;
+	YTUI_Vec2 x, y;
 } YTUI_Rect;
 
 typedef struct YTUI_Border {
@@ -18,13 +17,20 @@ typedef struct YTUI_TrueColour {
 	uint8_t r, g, b;
 } YTUI_TrueColour;
 
+typedef struct YTUI_TrueColourPair {
+	YTUI_TrueColour fore, back;
+} YTUI_TrueColourPair;
+
+typedef struct YTUI_ColourPair {
+	uint8_t fore, back;
+} YTUI_ColourPair;
 
 typedef struct YTUI_Attribute {
-	bool            colour;
-	bool            trueColour;
-	uint8_t         fgColour, bgColour;
-	YTUI_TrueColour trueFgColour, trueBgColour;
-	bool            bold, italic, underline, blink, reverse;
+	bool                colourEnabled;
+	bool                trueColourEnabled;
+	YTUI_ColourPair     colour;
+	YTUI_TrueColourPair trueColour;
+	bool                bold, italic, underline, blink, reverse, reset;
 } YTUI_Attribute;
 
 typedef struct YTUI_Character {
